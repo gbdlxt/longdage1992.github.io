@@ -46,6 +46,7 @@
             "echoCancellation": false
         };
         let streamId = 's0001';
+        let remoteStream = 's0002';
         // 初始化实例
         zg = new ZegoClient();
 
@@ -96,7 +97,7 @@
         }
 
         function pull() {
-            zg.startPlayingStream(streamId, remoteVideo)
+            zg.startPlayingStream(remoteStream, remoteVideo)
         }
         function stop() {
             zg.stopPublishingStream(streamId);

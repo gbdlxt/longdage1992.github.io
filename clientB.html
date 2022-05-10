@@ -43,7 +43,8 @@
             "autoGainControl": true,
             "echoCancellation": true
         };
-        let streamId = 's0001';
+        let streamId = 's0002';
+        let remoteStream = 's0001';
         // 初始化实例
         zg = new ZegoClient();
 
@@ -94,7 +95,7 @@
         }
 
         function pull() {
-            zg.startPlayingStream(streamId, remoteVideo)
+            zg.startPlayingStream(remoteStream, remoteVideo)
         }
 
         function getToken() {
