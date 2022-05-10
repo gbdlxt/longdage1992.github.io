@@ -1,0 +1,27 @@
+h1,
+h4 {
+    text-align: center;
+}
+
+.video-wrapper {
+    width: 610px;
+    margin: 0 auto;
+}
+
+.video-wrapper h4,
+video {
+    width: 300px;
+    display: inline-block;
+    position: relative;
+}
+
+.video-wrapper video {
+    height: auto;
+}
+#information {
+    height: 300px;
+    overflow: auto;
+}
+#information> * {
+    text-align: center;
+}
