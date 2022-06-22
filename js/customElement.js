@@ -39,9 +39,6 @@ class LgaMedia extends HTMLElement {
                 <p><strong>${quality.type}</strong></p>
                 <p><strong>延时(ms):</strong>${quality.currentRoundTripTime}</p>
                 <p><strong>分辨率:</strong>${quality.frameWidth}x${quality.frameHeight}</p>
-                <p><strong>音频帧率(fps):</strong>${quality.audioFPS}</p>
-                <p><strong>音频码率(kbps):</strong>${quality.audioBitrate}</p>
-                <p><strong>音频丢包率(%):</strong>${quality.audioPacketsLostRate}</p>
                 <p><strong>视频帧率(fps):</strong>${quality.videoFPS}</p>
                 <p><strong>视频码率(kbps):</strong>${quality.videoBitrate}</p>
                 <p><strong>视频丢包率(%):</strong>${quality.videoPacketsLostRate}</p>
