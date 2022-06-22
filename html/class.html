@@ -4,15 +4,11 @@
         <form>
             <div class="lga-form-group">
                 <label role="audioInput">音频设备</label>
-                <select id="audioInput" name="audioInput">
-                    <!-- <option value="320x640" selected>320x640</option> -->
-                </select>
+                <select id="audioInput" name="audioInput"></select>
             </div>
             <div class="lga-form-group">
                 <label role="videoInput">视频设备</label>
-                <select id="videoInput" name="videoInput">
-                    <!-- <option value="320x640" selected>320x640</option> -->
-                </select>
+                <select id="videoInput" name="videoInput"></select>
             </div>
             <div class="lga-form-group"></div>
             <div class="lga-form-group">
@@ -32,9 +28,8 @@
                 <label role="resolution">分辨率&nbsp;&nbsp;&nbsp;</label>
                 <select id="resolution" name="resolution">
                     <option value="320x640" selected>320x640</option>
-                    <option value="640x480">640x480</option>
-                    <option value="960x540">960x540</option>
-                    <option value="1280x720">1280x720</option>
+                    <option value="540x960">540x960</option>
+                    <option value="720x1280">720x1280</option>
                     <option value="customizeResolution">自定义</option>
                 </select>
             </div>
@@ -121,7 +116,7 @@
     $customizeFrameBitrate.hide();
     $customizeAudioBitrate.hide();
 
-    // 监听自定义 显示输入框事件
+    // 监听 自定义 显示输入框事件
     $resolution.change(function() {
         $(this).val().indexOf('customize')>-1? $customizeResolution.show(): $customizeResolution.hide();
     });
@@ -140,20 +135,21 @@
 
     // 加入课堂
     $loginClass.click(()=> {
-        const formData = getFormData();
-        const validateRst = validateForm(formData);
+        const formData = getFormData(); // 获取有效表单数据
+        const validateRst = validateForm(formData); // 校验输入
         if(validateRst) {
             alert(`${validateRst}不能为空`);
             return;
         }
         const options = Object.assign({renderSelector}, formData);
-        lingoAce.initClass(options);
-        lingoAce.loginClass();
+        lingoAce.initClass(options); // 初始化roomid、userid等
+        lingoAce.loginClass(); // 创建房间
     });
 
+    // 获取最终有效的表单数据。融合自定义输入，将联动类无效表单值剔除
     function getFormData() {
         let formData = {};
-        $form.serializeArray().forEach(item=> formData[item.name] = item.value);
+        $form.serializeArray().forEach(item=> formData[item.name] = item.value); // 表单数据[{name:value}]，数组转散列{name:value}
     
         if(formData.audioBitrate === 'customizeAudioBitrate') {
             formData.audioBitrate = formData.customizeAudioBitrate;
@@ -179,6 +175,7 @@
         return formData;
     }
 
+    // 校验输入，将未输入的项挑出来
     function validateForm(formData) {
         let validateArr = [];
         for(let p in formData) {
@@ -189,6 +186,7 @@
         return validateArr.join('、');
     }
 
+    // 枚举出设备列表，做成<option>插入设备的<select>中
     async function initDevices() {
         const { cameras, microphones } = await lingoAce.zg.enumDevices();
         let camerasDom = [];

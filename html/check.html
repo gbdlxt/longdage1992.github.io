@@ -45,15 +45,14 @@
 <script>
     $('p').hide();
 
-    const $startCheck = $('#startCheck');
-    const $goClass = $('#goClass');
+    const $startCheck = $('#startCheck'); // 开始检测按钮
+    const $goClass = $('#goClass'); // 进入课堂按钮
 
-    // 进入课堂
+    // 进入课堂 加载课堂的页面片段
     $goClass.click(()=> { $('body').load('/html/class.html'); });
 
     // 开始检测
     $startCheck.click(()=> {
-        // $goClass.attr('disabled', false);
         $startCheck.attr('disabled', true);
         $startCheck.text('检测中...');
         Promise.all([
@@ -70,6 +69,9 @@
             renderDeviceCheckDom('check_videoInput', deviceRst.cameras);
             renderConnectivity('check_connect', connectivity);
             $startCheck.text('检测结束');
+            $goClass.attr('disabled', false);
+        }).catch(e=> {
+            $startCheck.text('检测失败');
             $goClass.attr('disabled', false);
         });
     });
@@ -105,10 +107,10 @@
                     const streamId = new Date().getTime().toString();
                     const hasPublish = lingoAce.zg.startPublishingStream(streamId, stream);
                     hasPublish? resolve(true): resolve(false);
-                    // lingoAce.zg.stopPublishingStream(streamId);
+                    lingoAce.zg.stopPublishingStream(streamId);
                 }).catch(e=> resolve(false));
             });
-        })
+        });
     }
 
     function renderConnectivity(elId, state) {
