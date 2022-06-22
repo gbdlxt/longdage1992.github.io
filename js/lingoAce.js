@@ -1,15 +1,17 @@
 const lingoAce = (function() {
     let appID = 1739272706;
-    let server = 'wss://webliveroom-test.zego.im/ws';
+    // let server = 'wss://webliveroom-test.zego.im/ws';
+    let server = 'wss://webliveroom1739272706-api.zego.im/ws';
     let userID = new Date().getTime().toString(); // userID 用户自己设置，必须保证全局唯一
     let userName = userID;// userName 用户自己设置，没有唯一性要求
     let roomID = userID; // roomID 用户自己设置，必须保证全局唯一
     let renderSelector = '';
     let zg = new ZegoExpressEngine(appID, server);;
-    let hasInit = false;
+    let hasInit = false; // 标识是否初始化，防止重复绑定事件
     let localStream; // 本地流
     let localStreamID; // 本地流ID
 
+    // 创建流的约束
     let audioBitrate = 48;
     let frameBitrate = 400;
     let frameFPS = 15;
@@ -28,6 +30,8 @@ const lingoAce = (function() {
 
     // 缓存播放器数据
     let mediaModal = proxyModal();
+
+    // 利用代理，增加、删除mediaModal时，自动更新DOM
     function proxyModal() {
         return new Proxy({}, {
             set: (target, key, value, receiver)=> {
