@@ -18,6 +18,7 @@ const lingoAce = (function() {
     let videoInput = 'default';
     let audioInput = 'default';
 
+    // 设置日志级别
     const config = {
         logLevel: 'report',
         remoteLogLevel: 'report',
@@ -48,6 +49,7 @@ const lingoAce = (function() {
 
     function bindRoomStateUpdate() {
         zg.on('roomStateUpdate', async (roomID, state, errorCode, extendedData) => {
+            console.warn('[roomStateUpdate]', roomID, state, errorCode, extendedData);
             if(!errorCode) {
                 if (state == 'CONNECTED') {
                     const constraints = {
@@ -64,6 +66,7 @@ const lingoAce = (function() {
                             audioInput,
                         }
                     }
+                    console.warn('[roomStateUpdate]', constraints);
                     localStream = await zg.createStream(constraints);
                     localStreamID = `stream_${new Date().getTime().toString()}`;
                     const lgaMedia = new LgaMedia({streamID: localStreamID, userName, userID, srcObject: localStream});
@@ -79,6 +82,7 @@ const lingoAce = (function() {
     
     function bindRoomStreamUpdate() {
         zg.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
+            console.warn('[roomStreamUpdate]', roomID, updateType, streamList, extendedData)
             if (updateType == 'ADD') {
                 streamList.forEach(async item=> {
                     const streamID = item.streamID;
@@ -132,9 +136,9 @@ const lingoAce = (function() {
     function initClass(options) {
         setConfig(options);
         if(hasInit) { 
-            hasInit = true;
             return; 
         } // 已经被初始化了
+        hasInit = true;
         // zg = new ZegoExpressEngine(appID, server);
         bindRoomStateUpdate();
         bindRoomStreamUpdate();
@@ -171,6 +175,7 @@ const lingoAce = (function() {
     };
 
     function logoutClass() {
+        console.warn(localStreamID);
         if(localStreamID) {
             zg.stopPublishingStream(localStreamID);
             zg.destroyStream(localStream);
@@ -180,13 +185,13 @@ const lingoAce = (function() {
         renderSelector
             ? document.querySelector(renderSelector).innerHTML = ''
             : '';
+        console.warn(localStreamID, mediaModal);
     }
 
     return {
         initClass, // 初始化课堂，配置赋值，事件绑定
         loginClass,
         logoutClass,
-        mediaModal,
         zg
     };
 })();

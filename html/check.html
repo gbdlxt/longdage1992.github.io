@@ -105,7 +105,7 @@
                     const streamId = new Date().getTime().toString();
                     const hasPublish = lingoAce.zg.startPublishingStream(streamId, stream);
                     hasPublish? resolve(true): resolve(false);
-                    lingoAce.zg.stopPublishingStream(streamId);
+                    // lingoAce.zg.stopPublishingStream(streamId);
                 }).catch(e=> resolve(false));
             });
         })
