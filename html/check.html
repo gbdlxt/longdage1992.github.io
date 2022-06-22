@@ -1,0 +1,117 @@
+<div class="lga-check">
+    <dl>
+        <dt>
+            <h1>小班课环境检测</h1>
+            <button id="startCheck">开始检测</button>
+            <button disabled id="goClass">进入课堂</button>
+        </dt>
+        <dd id="check_webRTC">
+            <h2>webRTC</h2>
+            <p>当前浏览器支持webrtc！！！</p>
+            <p>当前浏览器不支持webrtc！！！</p>
+        </dd>
+        <dd id="check_capture">
+            <h2>获取设备</h2>
+            <p>当前浏览器支持获取设备！！！</p>
+            <p>当前浏览器不支持获取设备！！！</p>
+        </dd>
+        <dd id="check_H264State">
+            <h2>H264编码</h2>
+            <p>当前浏览器支持H264编码！！！</p>
+            <p>当前浏览器不支持H264编码！！！</p>
+        </dd>
+        <dd id="check_audioInput">
+            <h2>音频输入</h2>
+            <p>检测到音频输入设备！！！</p>
+            <p>未检测到音频输入设备！！！</p>
+        </dd>
+        <dd id="check_audioOutput">
+            <h2>音频输出</h2>
+            <p>检测到音频输出设备！！！</p>
+            <p>未检测到音频输出设备！！！</p>
+        </dd>
+        <dd id="check_videoInput">
+            <h2>视频输入</h2>
+            <p>检测到视频输入设备！！！</p>
+            <p>未检测到视频输入设备！！！</p>
+        </dd>
+        <dd id="check_connect">
+            <h2>连通性检测</h2>
+            <p>连通性检测成功！！！</p>
+            <p>连通性检测失败！！！</p>
+        </dd>
+    </dl>
+</div>
+<script>
+    $('p').hide();
+
+    const $startCheck = $('#startCheck');
+    const $goClass = $('#goClass');
+
+    // 进入课堂
+    $goClass.click(()=> { $('body').load('/html/class.html'); });
+
+    // 开始检测
+    $startCheck.click(()=> {
+        // $goClass.attr('disabled', false);
+        $startCheck.attr('disabled', true);
+        $startCheck.text('检测中...');
+        Promise.all([
+            lingoAce.zg.checkSystemRequirements(),
+            lingoAce.zg.enumDevices(),
+            checkConnectivity()
+        ]).then(results=> {
+            const [sysRst, deviceRst, connectivity] = results;
+            renderSysCheckDom('check_webRTC', sysRst.webRTC);
+            renderSysCheckDom('check_capture', sysRst.camera && sysRst.microphone);
+            renderSysCheckDom('check_H264State', sysRst.videoCodec.H264);
+            renderDeviceCheckDom('check_audioInput', deviceRst.microphones);
+            renderDeviceCheckDom('check_audioOutput', deviceRst.speakers);
+            renderDeviceCheckDom('check_videoInput', deviceRst.cameras);
+            renderConnectivity('check_connect', connectivity);
+            $startCheck.text('检测结束');
+            $goClass.attr('disabled', false);
+        });
+    });
+
+    function renderSysCheckDom(elId, state) {
+        let $p = $(`#${elId} p`);
+        if(state) { // 成功 true
+            $p.eq(0).show();
+            $p.eq(1).hide();
+        }else {
+            $p.eq(0).hide();
+            $p.eq(1).show();
+        }
+    }
+
+    function renderDeviceCheckDom(elId, data) {
+        let $p = $(`#${elId} p`);
+        if(data && data.length) { // 有设备
+            $p.eq(0).html($p.eq(0).html() + '  ' + data.map(item=> item.deviceName).join('、'));
+            $p.eq(0).show();
+            $p.eq(1).hide();
+        }else {
+            $p.eq(0).hide();
+            $p.eq(1).show();
+        }
+    }
+
+    async function checkConnectivity() { // 连通性测试，推一条测试流。测试结束终止推流。
+        return new Promise((resolve)=> {
+            lingoAce.loginClass().then(rst=> {
+                if(!rst) { resolve(false) }
+                lingoAce.zg.createStream({camera: {video: true, audio: true}}).then(stream=> {
+                    const streamId = new Date().getTime().toString();
+                    const hasPublish = lingoAce.zg.startPublishingStream(streamId, stream);
+                    hasPublish? resolve(true): resolve(false);
+                    lingoAce.zg.stopPublishingStream(streamId);
+                }).catch(e=> resolve(false));
+            });
+        })
+    }
+
+    function renderConnectivity(elId, state) {
+        renderSysCheckDom(elId, state);
+    }
+</script>

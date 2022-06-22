@@ -1,0 +1,206 @@
+<div class="lga-class">
+    <h1>领格教育小班课</h1>
+    <section>
+        <form>
+            <div class="lga-form-group">
+                <label role="audioInput">音频设备</label>
+                <select id="audioInput" name="audioInput">
+                    <!-- <option value="320x640" selected>320x640</option> -->
+                </select>
+            </div>
+            <div class="lga-form-group">
+                <label role="videoInput">视频设备</label>
+                <select id="videoInput" name="videoInput">
+                    <!-- <option value="320x640" selected>320x640</option> -->
+                </select>
+            </div>
+            <div class="lga-form-group"></div>
+            <div class="lga-form-group">
+                <label role="roomID">房间号&nbsp;&nbsp;&nbsp;</label>
+                <input type="number" id="roomID" name="roomID" placeholder="roomID">
+            </div>
+            <div class="lga-form-group">
+                <label role="userName">用户名&nbsp;&nbsp;&nbsp;</label>
+                <input type="text" id="userName" name="userName" placeholder="userName">
+            </div>
+            <div class="lga-form-group">
+                <label role="userID">用户ID&nbsp;&nbsp;&nbsp;</label>
+                <input type="text" id="userID" name="userID" placeholder="userID">
+            </div>
+            
+            <div class="lga-form-group">
+                <label role="resolution">分辨率&nbsp;&nbsp;&nbsp;</label>
+                <select id="resolution" name="resolution">
+                    <option value="320x640" selected>320x640</option>
+                    <option value="640x480">640x480</option>
+                    <option value="960x540">960x540</option>
+                    <option value="1280x720">1280x720</option>
+                    <option value="customizeResolution">自定义</option>
+                </select>
+            </div>
+            <div class="lga-form-group">
+                <label role="frameFPS">视频帧率</label>
+                <select id="frameFPS" name="frameFPS">
+                    <option value="15" selected>15 fps</option>
+                    <option value="20">20 fps</option>
+                    <option value="30">30 fps</option>
+                    <option value="customizeFrameFPS">自定义</option>
+                </select>
+            </div>
+            <div class="lga-form-group">
+                <label role="frameBitrate">视频码率</label>
+                <select id="frameBitrate" name="frameBitrate">
+                    <option value="400" selected>400 kbps</option>
+                    <option value="600">600 kbps</option>
+                    <option value="1200">1200 kbps</option>
+                    <option value="customizeFrameBitrate">自定义</option>
+                </select>
+            </div>
+            <div class="lga-form-group">
+                <label role="audioBitrate">音频码率</label>
+                <select id="audioBitrate" name="audioBitrate">
+                    <option value="48" selected>48 kbps</option>
+                    <option value="customizeAudioBitrate">自定义</option>
+                </select>
+            </div>
+            <div class="lga-form-group" customizeResolution>
+                <label role="customizeFrameWidth">分辨率宽</label>
+                <input type="text" id="customizeFrameWidth" name="customizeFrameWidth" placeholder="frameWidth">
+            </div>
+            
+            <div class="lga-form-group" customizeResolution>
+                <label role="customizeFrameHeight">分辨率高</label>
+                <input type="text" id="customizeFrameHeight" name="customizeFrameHeight" placeholder="frameHeight">
+            </div>
+            <div class="lga-form-group" customizeFrameFPS>
+                <label role="customizeFrameFPS">视频帧率</label>
+                <input type="text" id="customizeFrameFPS" name="customizeFrameFPS" placeholder="frameFPS">
+            </div>
+            <div class="lga-form-group" customizeFrameBitrate>
+                <label role="customizeFrameBitrate">视频码率</label>
+                <input type="text" id="customizeFrameBitrate" name="customizeFrameBitrate" placeholder="frameBitrate">
+            </div>
+            <div class="lga-form-group" customizeAudioBitrate>
+                <label role="customizeAudioBitrate">音频码率</label>
+                <input type="text" id="customizeAudioBitrate" name="customizeAudioBitrate" placeholder="frameBitrate">
+            </div>
+        </form>
+        <button id="loginClass">加入课堂</button>
+        <button id="logoutClass">退出课堂</button>
+    </section>
+    <section class="lga-container lga-media-container"></section>
+</div>
+<script>
+    const $form = $('.lga-class form');
+    const $loginClass = $('#loginClass'); // 加入课堂按钮
+    const $logoutClass = $('#logoutClass'); // 退出课堂按钮
+    const renderSelector = '.lga-container'; // 媒体在此容器播放
+
+    const $audioInput = $('#audioInput'); // 音频设备
+    const $videoInput = $('#videoInput'); // 视频设备
+    const $roomID = $('#roomID'); // 房间号
+    const $userName = $('#userName'); // 用户名
+    const $userID = $('#userID'); // 用户ID
+
+    const $resolution = $('#resolution'); // 选择分辨率
+    const $frameFPS = $('#frameFPS'); // 选择视频帧率
+    const $frameBitrate = $('#frameBitrate'); // 选择视频码率
+    const $audioBitrate = $('#audioBitrate'); // 选择音频码率
+
+    const $customizeResolution = $('[customizeResolution]'); // 自定义分辨率
+    const $customizeFrameFPS = $('[customizeFrameFPS]'); // 自定义视频帧率
+    const $customizeFrameBitrate = $('[customizeFrameBitrate]'); //自定义视频码率
+    const $customizeAudioBitrate = $('[customizeAudioBitrate]'); //自定义音频码率
+
+    // 初始化设备列表
+    initDevices();
+
+    // 隐藏自定义框
+    $customizeResolution.hide();
+    $customizeFrameFPS.hide();
+    $customizeFrameBitrate.hide();
+    $customizeAudioBitrate.hide();
+
+    // 监听自定义 显示输入框事件
+    $resolution.change(function() {
+        $(this).val().indexOf('customize')>-1? $customizeResolution.show(): $customizeResolution.hide();
+    });
+    $frameFPS.change(function() {
+        $(this).val().indexOf('customize')>-1? $customizeFrameFPS.show(): $customizeFrameFPS.hide();
+    });
+    $frameBitrate.change(function() {
+        $(this).val().indexOf('customize')>-1? $customizeFrameBitrate.show(): $customizeFrameBitrate.hide();
+    });
+    $audioBitrate.change(function() {
+        $(this).val().indexOf('customize')>-1? $customizeAudioBitrate.show(): $customizeAudioBitrate.hide();
+    });
+
+    // 退出课堂
+    $logoutClass.click(()=> { lingoAce.logoutClass(); });
+
+    // 加入课堂
+    $loginClass.click(()=> {
+        const formData = getFormData();
+        const validateRst = validateForm(formData);
+        if(validateRst) {
+            alert(`${validateRst}不能为空`);
+            return;
+        }
+        const options = Object.assign({renderSelector}, formData);
+        lingoAce.initClass(options);
+        lingoAce.loginClass();
+    });
+
+    function getFormData() {
+        let formData = {};
+        $form.serializeArray().forEach(item=> formData[item.name] = item.value);
+    
+        if(formData.audioBitrate === 'customizeAudioBitrate') {
+            formData.audioBitrate = formData.customizeAudioBitrate;
+        }
+        if(formData.frameFPS === 'customizeFrameFPS') {
+            formData.frameFPS = formData.customizeFrameFPS;
+        }
+        if(formData.frameBitrate === 'customizeFrameBitrate') {
+            formData.frameBitrate = formData.customizeFrameBitrate;
+        }
+        if(formData.resolution === 'customizeResolution') {
+            formData.frameHeight = formData.customizeFrameHeight
+            formData.frameWidth = formData.customizeFrameWidth;
+        }else {
+            [formData.frameWidth, formData.frameHeight] = formData.resolution.split('x');
+        }
+        delete formData.customizeAudioBitrate;
+        delete formData.customizeFrameFPS;
+        delete formData.customizeFrameBitrate;
+        delete formData.customizeFrameHeight;
+        delete formData.customizeFrameWidth;
+        delete formData.resolution;
+        return formData;
+    }
+
+    function validateForm(formData) {
+        let validateArr = [];
+        for(let p in formData) {
+            if(!formData[p]) {
+                validateArr.push(p);
+            }
+        }
+        return validateArr.join('、');
+    }
+
+    async function initDevices() {
+        const { cameras, microphones } = await lingoAce.zg.enumDevices();
+        let camerasDom = [];
+        let microphonesDom = [];
+        cameras.forEach((item,i)=> {
+            camerasDom.push(`<option value="${item.deviceID}" ${i === 0? 'selected': ''}>${item.deviceName}</option>`)
+        });
+        microphones.forEach((item,i)=> {
+            microphonesDom.push(`<option value="${item.deviceID}" ${i === 0? 'selected': ''}>${item.deviceName}</option>`)
+        });
+        $videoInput.html(camerasDom.join(''));
+        $audioInput.html(microphonesDom.join(''));
+    }
+
+</script>

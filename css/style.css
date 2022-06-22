@@ -1,0 +1,169 @@
+/* reset styles */
+@charset "utf-8";
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+html,
+body {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    font-size: 12px;
+}
+
+/* 瀑布流布局 */
+.lga-header {
+    text-align: center;
+    padding: 24px;
+    position: fixed;
+    width: 100%;
+    background-color: #eeeeee3d;
+    z-index: 9;
+}
+.lga-container {
+    column-gap: 24px;
+    column-count: 3;
+}
+.lga-col-4 {
+    column-count: 4;
+}
+.lga-col-5 {
+    column-count: 5;
+}
+.lga-media {
+    margin-bottom: 36px;
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+.lga-media-info {
+    height: 36px;
+    line-height: 30px;
+    padding: 0 6px;
+}
+.lga-media video {
+    width: 100%;
+}
+.lga-container .lga-media {
+    overflow: auto;
+    height: 100%;
+}
+.lga-container .lga-media video {
+    border-radius: 12px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: #eee;
+}
+.lga-media-quality {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 12px;
+    background: #ffffff61;
+    border-bottom-left-radius: 12px;
+    width: 150px;
+}
+
+button {
+    background-color: rgb(52, 126, 246);
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    border-radius: 0.3rem;
+    border: 0;
+    outline: 0;
+    color: #fff;
+    /* position: absolute;
+    right: 0; */
+}
+button:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+/* lga-check 检测页面的样式 */
+.lga-check {
+    width: 100%;
+    padding: 48px;
+}
+.lga-check h1 {
+    font-size: 2rem;
+    display: inline-block;
+}
+.lga-check h2 {
+    font-size: 1.5rem;
+}
+.lga-check dt {
+    margin-bottom: 36px;
+    position: relative;
+}
+.lga-check dd {
+    margin-bottom: 12px;
+}
+.lga-check dd h2 {
+    padding: 6px 12px;
+    background-color: rgb(52, 126, 246);
+    color: #fff;
+    border-radius: 0.3rem;
+}
+.lga-check dd p {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+}
+.lga-check dd p:nth-child(2n) {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+.lga-check dd p:nth-child(2n+1) {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+
+
+/* lga-class */
+.lga-class {
+    width: 100%;
+    padding: 48px;
+}
+.lga-class h1{
+    font-size: 2rem;
+    display: inline-block;
+    margin-bottom: 36px;
+    position: relative;
+}
+.lga-class form {
+    display: flex;
+    flex-wrap: wrap;
+}
+.lga-form-group {
+    width: 33.33333%;
+    position: relative;
+    display: flex;
+    padding: 12px 24px 12px 0;
+    align-items: center;
+    justify-content: center;
+}
+.lga-form-group label {
+    font-size: 1.25rem;
+    padding: 0 6px 0 0;
+    font-weight: 600;
+}
+.lga-form-group input,
+.lga-form-group select {
+    height: 36px;
+    padding: 0 12px;
+    flex: 1;
+    border: 1px solid #ced4da;
+    outline: none;
+    border-radius: 0.3rem;
+}
+.lga-media-container {
+    margin-top: 48px;
+}
