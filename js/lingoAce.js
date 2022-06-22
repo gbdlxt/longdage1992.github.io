@@ -90,7 +90,7 @@ const lingoAce = (function() {
             if (updateType == 'ADD') {
                 streamList.forEach(async item=> {
                     const streamID = item.streamID;
-                    if(streamID.indexOf('stream_') === -1 ) { return; } // 排除探测流
+                    // if(streamID.indexOf('stream_') === -1 ) { return; } // 排除探测流
                     const remoteStream = await zg.startPlayingStream(streamID);
                     const {userName, userID } = item.user;
                     const lgaMedia = new LgaMedia({streamID, userName, userID, srcObject: remoteStream});
