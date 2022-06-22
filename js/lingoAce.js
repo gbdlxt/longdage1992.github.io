@@ -72,9 +72,11 @@ const lingoAce = (function() {
                     }
                     console.warn('[roomStateUpdate]', constraints);
                     localStream = await zg.createStream(constraints);
-                    localStreamID = `stream_${new Date().getTime().toString()}`;
-                    const lgaMedia = new LgaMedia({streamID: localStreamID, userName, userID, srcObject: localStream});
-                    mediaModal[localStreamID] = lgaMedia;
+                    // localStreamID = `stream_${new Date().getTime().toString()}`;
+                    localStreamID = `${new Date().getTime().toString()}`;
+                    const muted = true; // 本地流静音
+                    const lgaMedia = new LgaMedia({streamID: localStreamID, userName, userID, srcObject: localStream, muted});
+                    mediaModal[`stream_${localStreamID}`] = lgaMedia;
                     
                     zg.startPublishingStream(localStreamID, localStream);
                 } //state == 'CONNECTING' 、'DISCONNECTED'
@@ -94,12 +96,13 @@ const lingoAce = (function() {
                     const remoteStream = await zg.startPlayingStream(streamID);
                     const {userName, userID } = item.user;
                     const lgaMedia = new LgaMedia({streamID, userName, userID, srcObject: remoteStream});
-                    mediaModal[streamID] = lgaMedia;
+                    mediaModal[`stream_${streamID}`] = lgaMedia;
                 });
             } else if (updateType == 'DELETE') {
+                console.error('[roomStreamUpdate]', streamList);
                 const streamID = streamList[0].streamID;
                 zg.stopPlayingStream(streamID);
-                delete mediaModal[streamID];
+                delete mediaModal[`stream_${streamID}`];
             }
         });
     }
@@ -108,7 +111,7 @@ const lingoAce = (function() {
         zg.on('publishQualityUpdate', (streamID, stats)=> {
             console.warn('publishQualityUpdate', streamID, stats);
             const quality = getQualityData(stats, '推流质量');
-            mediaModal[streamID].setQuality(quality);
+            mediaModal[`stream_${streamID}`].setQuality(quality);
         });
         
     }
@@ -117,7 +120,7 @@ const lingoAce = (function() {
         zg.on('playQualityUpdate', (streamID, stats)=> {
             console.warn('playQualityUpdate', streamID, stats);
             const quality = getQualityData(stats, '拉流质量');
-            mediaModal[streamID].setQuality(quality);
+            mediaModal[`stream_${streamID}`].setQuality(quality);
         });
     }
 

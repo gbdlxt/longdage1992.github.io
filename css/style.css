@@ -38,6 +38,7 @@ body {
     position: relative;
     border-radius: 12px;
     border: 1px solid #eee;
+    display: block;
 }
 .lga-media-info {
     height: 36px;

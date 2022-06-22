@@ -3,7 +3,7 @@
  *            Custom components           *
  *                                        *
  *----------------------------------------*/
-class LgaMedia extends HTMLDivElement {
+class LgaMedia extends HTMLElement {
     constructor(options) {
         super();
         this.initParas(options);
@@ -20,9 +20,9 @@ class LgaMedia extends HTMLDivElement {
 
     genarateDom() {
         this.className = 'lga-media';
-        this.id = this.streamID;
+        this.id = `stream_${this.streamID}`;
         this.innerHTML = `
-            <video class="lga-media-video" autoplay muted playsinline loop></video>
+            <video class="lga-media-video" autoplay playsinline controls ${this.muted? 'muted': ''}></video>
             <div class="lga-media-info">${this.userName}</div>
             <div class="lga-media-quality"></div>
         `;
@@ -56,4 +56,4 @@ class LgaMedia extends HTMLDivElement {
         return this.video;
     }
 }
-customElements.define('lga-media', LgaMedia, { extends: "div" });
+customElements.define('lga-media', LgaMedia);
