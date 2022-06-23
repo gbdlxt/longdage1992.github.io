@@ -1,7 +1,6 @@
 const lingoAce = (function() {
-    let appID = 1739272706;
-    // let server = 'wss://webliveroom-test.zego.im/ws';
-    let server = 'wss://webliveroom1739272706-api.zego.im/ws';
+    let appID = 2126428027;
+    let server = 'wss://webliveroom2126428027-api.zego.im/ws';
     let userID = new Date().getTime().toString(); // userID 用户自己设置，必须保证全局唯一
     let userName = userID;// userName 用户自己设置，没有唯一性要求
     let roomID = userID; // roomID 用户自己设置，必须保证全局唯一
@@ -68,11 +67,11 @@ const lingoAce = (function() {
                             frameRate: frameFPS,
                             videoInput,
                             audioInput,
+                            videoOptimizationMode: 'motion' //motion、detail； motion：流畅优先，在大多数情况下，SDK 不会降低帧率，但是可能会降低发送分辨率
                         }
                     }
                     console.warn('[roomStateUpdate]', constraints);
                     localStream = await zg.createStream(constraints);
-                    // localStreamID = `stream_${new Date().getTime().toString()}`;
                     localStreamID = `${new Date().getTime().toString()}`;
                     const muted = true; // 本地流静音
                     const lgaMedia = new LgaMedia({streamID: localStreamID, userName, userID, srcObject: localStream, muted});
