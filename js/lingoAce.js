@@ -188,6 +188,7 @@ const lingoAce = (function() {
         if(localStreamID) {
             zg.stopPublishingStream(localStreamID);
             zg.destroyStream(localStream);
+            localStreamID = '';
         }
         zg.logoutRoom(roomID);
         mediaModal = proxyModal();
