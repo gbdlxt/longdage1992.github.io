@@ -55,6 +55,9 @@ const lingoAce = (function() {
             console.warn('[roomStateUpdate]', roomID, state, errorCode, extendedData);
             if(!errorCode) {
                 if (state == 'CONNECTED') {
+                    if(localStreamID) { // 网络波动，重新连接不要再创建流
+                        return; 
+                    } 
                     const constraints = {
                         camera: {
                             audio: true, 
