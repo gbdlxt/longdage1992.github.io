@@ -57,6 +57,7 @@ body {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
     background-color: #eee;
+    position: relative;
 }
 .lga-media-quality {
     position: absolute;
