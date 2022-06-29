@@ -108,6 +108,7 @@
                     const hasPublish = lingoAce.zg.startPublishingStream(streamId, stream);
                     hasPublish? resolve(true): resolve(false);
                     lingoAce.zg.stopPublishingStream(streamId);
+                    lingoAce.zg.destroyStream(stream);
                 }).catch(e=> resolve(false));
             });
         });
