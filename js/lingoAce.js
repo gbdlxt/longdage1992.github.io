@@ -10,7 +10,7 @@ const lingoAce = (function() {
     let localStream; // 本地流
     let localStreamID; // 本地流ID
 
-    // 创建流的约束
+    // 创建流的约束变量
     let audioBitrate = 48;
     let frameBitrate = 400;
     let frameFPS = 15;
@@ -27,10 +27,10 @@ const lingoAce = (function() {
     };
     zg.setLogConfig(config);
 
-    // 缓存播放器数据
+    // 缓存播放器数据 {stream_${streamID}: LgaMedia}
     let mediaModal = proxyModal();
 
-    // 利用代理，增加、删除mediaModal时，自动更新DOM
+    // 利用代理，增加、删除mediaModal时，自动更新流的渲染DOM。(与mvvm双向绑定机制一致)
     function proxyModal() {
         return new Proxy({}, {
             set: (target, key, value, receiver)=> {
@@ -50,6 +50,7 @@ const lingoAce = (function() {
         });
     }
 
+    // 监听房间状态变化事件
     function bindRoomStateUpdate() {
         zg.on('roomStateUpdate', async (roomID, state, errorCode, extendedData) => {
             console.warn('[roomStateUpdate]', roomID, state, errorCode, extendedData);
@@ -74,9 +75,9 @@ const lingoAce = (function() {
                         }
                     }
                     console.warn('[roomStateUpdate]', constraints);
-                    localStream = await zg.createStream(constraints);
-                    localStreamID = `${new Date().getTime().toString()}`;
-                    const muted = true; // 本地流静音
+                    localStream = await zg.createStream(constraints); // 本地流，保存到外层，方便退出等操作时销毁
+                    localStreamID = `${new Date().getTime().toString()}`; // 本地流ID，保存到外层，方便退出等操作时销毁
+                    const muted = true; // 本地流静音 防回采产生的啸音
                     const lgaMedia = new LgaMedia({streamID: localStreamID, userName, userID, srcObject: localStream, muted});
                     mediaModal[`stream_${localStreamID}`] = lgaMedia;
                     
@@ -88,13 +89,13 @@ const lingoAce = (function() {
         });
     }
     
+    // 监听流变化事件
     function bindRoomStreamUpdate() {
         zg.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
             console.warn('[roomStreamUpdate]', roomID, updateType, streamList, extendedData)
             if (updateType == 'ADD') {
                 streamList.forEach(async item=> {
                     const streamID = item.streamID;
-                    // if(streamID.indexOf('stream_') === -1 ) { return; } // 排除探测流
                     const remoteStream = await zg.startPlayingStream(streamID);
                     const {userName, userID } = item.user;
                     const lgaMedia = new LgaMedia({streamID, userName, userID, srcObject: remoteStream});
@@ -109,6 +110,7 @@ const lingoAce = (function() {
         });
     }
     
+    // 监听推流质量事件
     function bindPublishQualityUpdate () {
         zg.on('publishQualityUpdate', (streamID, stats)=> {
             console.warn('publishQualityUpdate', streamID, stats);
@@ -118,6 +120,7 @@ const lingoAce = (function() {
         
     }
     
+    // 监听拉流质量事件
     function bindPlayQualityUpdate() {
         zg.on('playQualityUpdate', (streamID, stats)=> {
             console.warn('playQualityUpdate', streamID, stats);
@@ -126,6 +129,7 @@ const lingoAce = (function() {
         });
     }
 
+    // 将质量数据提炼出需要展示的数据； stats: 质量数据，type：推流质量|拉流质量
     function getQualityData(stats, type) {
         return {
             type,
@@ -141,7 +145,7 @@ const lingoAce = (function() {
         };
     }
     
-    // options: {appID, server, userID, userName, roomID, renderSelector}
+    // 初始化课堂，初始化流约束条件，以及绑定事件
     function initClass(options) {
         setConfig(options);
         if(hasInit) { 
@@ -156,6 +160,7 @@ const lingoAce = (function() {
         return zg;
     };
 
+    // 界面上视频流各种约束条件赋值
     function setConfig(options) {
         console.log('[setConfig]', options);
         renderSelector = options.renderSelector;
@@ -171,6 +176,7 @@ const lingoAce = (function() {
         audioInput = options.audioInput;
     }
 
+    // 登录房间 获取token再登录房间
     async function loginClass() {
         return new Promise(resolve=> {
             fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
@@ -183,6 +189,7 @@ const lingoAce = (function() {
         });
     };
 
+    // 登出房间 本地流资源释放、登出房间后还要把流渲染DOM清空
     function logoutClass() {
         console.warn(localStreamID);
         if(localStreamID) {

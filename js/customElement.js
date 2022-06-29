@@ -4,6 +4,7 @@
  *                                        *
  *----------------------------------------*/
 class LgaMedia extends HTMLElement {
+    // optins: {streamID, userName, userID, srcObject: Stream, muted}
     constructor(options) {
         super();
         this.initParas(options);
@@ -18,6 +19,7 @@ class LgaMedia extends HTMLElement {
         }
     }
 
+    // 生成流的渲染节点
     genarateDom() {
         this.className = 'lga-media';
         this.id = `stream_${this.streamID}`;
@@ -33,6 +35,7 @@ class LgaMedia extends HTMLElement {
         }
     }
 
+    // 质量数据插入流渲染节点的<div class="lga-media-quality"></div>里
     setQuality(quality) {
         console.log(quality);
         this.quality.innerHTML = `
@@ -44,13 +47,6 @@ class LgaMedia extends HTMLElement {
                 <p><strong>视频丢包率(%):</strong>${quality.videoPacketsLostRate}</p>
         `;
     }
-    // setInfo(info) {
-    //     console.log(info);
-    //     this.info.textContent = info;
-    // }
-
-    getVideoElement() {
-        return this.video;
-    }
 }
+
 customElements.define('lga-media', LgaMedia);
