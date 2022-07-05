@@ -20,10 +20,10 @@
     function addVideo() {
         setTimeout(() => {
             externerCon.innerHTML = `
-            <video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>
-            <video id="externerVideo1" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>
-            <video id="externerVideo2" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>
-            `
+            <video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" muted loop=""></video>
+            <video id="externerVideo1" crossorigin="anonymous" playsinline="" autoplay controls="" muted loop=""></video>
+            <video id="externerVideo2" crossorigin="anonymous" playsinline="" autoplay controls="" muted loop=""></video>
+            `;
         }, 0) // 1000毫秒内创建才能生效。
 
         setTimeout(() => {
