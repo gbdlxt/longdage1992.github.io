@@ -14,19 +14,12 @@
 
         function createVideoPool() {
             if(videoPool.length) { return; }
-            for(let i = 0; i < 1; i++) {
-                (function() {
-                    const video = document.createElement('video');
-                    video.setAttribute('playsinline', '');
-                    video.setAttribute('autoplay', '');
-                    video.setAttribute('controls', '');
-                    // document.querySelector('#container').appendChild(video);
-                    document.querySelector('#container').innerHTML = `
-                        <video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>
-                    `
-                })(i);
-            }
+            document.querySelector('#container').innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`;
         }
+
+        setTimeout(()=> {
+            document.querySelector("video").src="/custom.mp4";
+        }, 3000);
 
         let appID = 1739272706;
         let server = 'wss://webliveroom-test.zego.im/ws';
@@ -50,7 +43,7 @@
                 const remoteStream = await zg.startPlayingStream(streamID);
                 const remoteVideo = document.querySelector("video")
                 // remoteVideo.srcObject = remoteStream;
-                remoteVideo.src = '/custom.mp4';
+                // remoteVideo.src = '/custom.mp4';
                 
                 // document.querySelector('#container').appendChild(remoteVideo);
             } else if (updateType == 'DELETE') {
