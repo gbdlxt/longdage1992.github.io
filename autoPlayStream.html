@@ -12,7 +12,7 @@
         document.addEventListener("WeixinJSBridgeReady", addVideo)
         function addVideo() {
             setTimeout(() => {
-            externerCon2.innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`
+                externerVideo.innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`
             }, 0) // 1000毫秒内创建才能生效。
 
             setTimeout(() => {
