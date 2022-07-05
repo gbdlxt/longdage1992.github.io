@@ -8,56 +8,68 @@
         <div id="container"></div>
     </body>
     <script>
-        let videoPool = [];
-        // document.addEventListener("load", createVideoPool())
-        document.addEventListener("WeixinJSBridgeReady", createVideoPool());
+        const container = document.querySelector('#container');
+        document.addEventListener("WeixinJSBridgeReady", addVideo)
+        function addVideo() {
+            setTimeout(() => {
+            externerCon2.innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`
+            }, 0) // 1000毫秒内创建才能生效。
 
-        function createVideoPool() {
-            if(videoPool.length) { return; }
-            document.querySelector('#container').innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`;
-            setTimeout(()=> {
-                document.querySelector("video").src="/custom.mp4";
-            }, 3000);
+            setTimeout(() => {
+                externerVideo = document.querySelector("#externerVideo")
+                externerVideo.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
+            }, 3000)// 模拟任意时间，从播放器资源池拿到播放器播放
         }
+
+        // document.addEventListener("load", createVideoPool())
+        // document.addEventListener("WeixinJSBridgeReady", createVideoPool());
+
+        // function createVideoPool() {
+        //     if(videoPool.length) { return; }
+        //     document.querySelector('#container').innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`;
+        //     setTimeout(()=> {
+        //         document.querySelector("video").src="/custom.mp4";
+        //     }, 3000);
+        // }
 
         
 
-        let appID = 1739272706;
-        let server = 'wss://webliveroom-test.zego.im/ws';
+        // let appID = 1739272706;
+        // let server = 'wss://webliveroom-test.zego.im/ws';
 
-        let userID = 'misaiya'; // userID 用户自己设置，必须保证全局唯一
-        let userName = "弥赛亚";// userName 用户自己设置，没有唯一性要求
-        let roomID = "112221"; // roomID 用户自己设置，必须保证全局唯一
+        // let userID = 'misaiya'; // userID 用户自己设置，必须保证全局唯一
+        // let userName = "弥赛亚";// userName 用户自己设置，没有唯一性要求
+        // let roomID = "112221"; // roomID 用户自己设置，必须保证全局唯一
 
-        const zg = new ZegoExpressEngine(appID, server);
-        const config = {
-            logLevel: 'report',
-            remoteLogLevel: 'report',
-            logURL: ''
-        };
-        zg.setLogConfig(config);
+        // const zg = new ZegoExpressEngine(appID, server);
+        // const config = {
+        //     logLevel: 'report',
+        //     remoteLogLevel: 'report',
+        //     logURL: ''
+        // };
+        // zg.setLogConfig(config);
 
-        zg.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
-            console.error('[roomStreamUpdate]', roomID, updateType, streamList, extendedData);
-            if (updateType == 'ADD') {
-                const streamID = streamList[0].streamID;
-                const remoteStream = await zg.startPlayingStream(streamID);
-                const remoteVideo = document.querySelector("video")
-                // remoteVideo.srcObject = remoteStream;
-                // remoteVideo.src = '/custom.mp4';
+        // zg.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
+        //     console.error('[roomStreamUpdate]', roomID, updateType, streamList, extendedData);
+        //     if (updateType == 'ADD') {
+        //         const streamID = streamList[0].streamID;
+        //         const remoteStream = await zg.startPlayingStream(streamID);
+        //         const remoteVideo = document.querySelector("video")
+        //         // remoteVideo.srcObject = remoteStream;
+        //         // remoteVideo.src = '/custom.mp4';
                 
-                // document.querySelector('#container').appendChild(remoteVideo);
-            } else if (updateType == 'DELETE') {
-                const streamID = streamList[0].streamID;
-                zg.stopPlayingStream(streamID);
-            }
-        });
-        // 加入房间
-        fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
-            .then(rsp=> rsp.text())
-            .then(token=> {
-                zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true })
-            });
+        //         // document.querySelector('#container').appendChild(remoteVideo);
+        //     } else if (updateType == 'DELETE') {
+        //         const streamID = streamList[0].streamID;
+        //         zg.stopPlayingStream(streamID);
+        //     }
+        // });
+        // // 加入房间
+        // fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
+        //     .then(rsp=> rsp.text())
+        //     .then(token=> {
+        //         zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true })
+        //     });
 
     </script>
 </html>
