@@ -31,14 +31,14 @@
           externerCon2.innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`
         }, 0) // 1000毫秒内创建才能生效。
 
-        setTimeout(() => {
+        
+      }
+
+      setTimeout(() => {
           externerVideo = document.querySelector("#externerVideo")
           externerVideo.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
           // externerVideo.play();
         }, 3000)// 模拟任意时间，从播放器资源池拿到播放器播放
-      }
-
-      
     </script>
   </body>
 </html>

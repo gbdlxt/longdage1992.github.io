@@ -15,11 +15,12 @@
         function createVideoPool() {
             if(videoPool.length) { return; }
             document.querySelector('#container').innerHTML = `<video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></video>`;
+            setTimeout(()=> {
+                document.querySelector("video").src="/custom.mp4";
+            }, 3000);
         }
 
-        setTimeout(()=> {
-            document.querySelector("video").src="/custom.mp4";
-        }, 3000);
+        
 
         let appID = 1739272706;
         let server = 'wss://webliveroom-test.zego.im/ws';
