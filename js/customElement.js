@@ -24,7 +24,7 @@ class LgaMedia extends HTMLElement {
         this.className = 'lga-media';
         this.id = `stream_${this.streamID}`;
         this.innerHTML = `
-            <video class="lga-media-video" autoplay loop playsinline controls ${this.muted? 'muted': ''}></video>
+            <video class="lga-media-video" autoplay loop playsinline controls ${this.muted? 'muted style="transform:scale(-1,1);"': ''}></video>
             <div class="lga-media-info">${this.userName}</div>
             <div class="lga-media-quality"></div>
         `;
