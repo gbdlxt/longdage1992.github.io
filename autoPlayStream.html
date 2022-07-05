@@ -53,6 +53,9 @@
         console.warn('[roomStreamUpdate]', roomID, updateType, streamList, extendedData);
         const streamID = streamList[0].streamID;
         if (updateType == 'ADD') {
+            document.querySelectorAll('video').forEach(video=> {
+                video.muted = false;
+            });
             const remoteStream = await zg.startPlayingStream(streamID);
             const remoteVideo1 = document.getElementById('externerVideo1');
             const remoteVideo2 = document.getElementById('externerVideo2');
@@ -61,6 +64,9 @@
             }
             remoteVideo1.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
             remoteVideo2.srcObject = remoteStream;
+            document.querySelectorAll('video').forEach(video=> {
+                video.muted = true;
+            });
         } else if (updateType == 'DELETE') {
             zg.stopPlayingStream(streamID)
         }
