@@ -3,6 +3,22 @@
     <section>
         <form>
             <div class="lga-form-group">
+                <label role="address">地理位置</label>
+                <input type="text" id="address" name="address" value="中国/广东省/深圳市" placeholder="Country/Province/City">
+            </div>
+            <div class="lga-form-group">
+                <label role="operator">运营商&nbsp;&nbsp;&nbsp;</label>
+                <input type="text" id="operator" name="operator" placeholder="Network operators">
+            </div>
+            <div class="lga-form-group">
+                <label role="streamType">流类型</label>
+                <select id="streamType" name="streamType">
+                    <option value="camera" selected>音视频流</option>
+                    <option value="custom">第三方流</option>
+                </select>
+            </div>
+
+            <div class="lga-form-group">
                 <label role="audioInput">音频设备</label>
                 <select id="audioInput" name="audioInput"></select>
             </div>
@@ -27,8 +43,11 @@
             <div class="lga-form-group">
                 <label role="resolution">分辨率&nbsp;&nbsp;&nbsp;</label>
                 <select id="resolution" name="resolution">
-                    <option value="360x640" selected>360x640</option>
-                    <option value="540x960">540x960</option>
+                    <option value="240x180" selected>240x180</option>
+                    <option value="320x240" selected>320x240</option>
+                    <option value="1280x720" selected>1280x720</option>
+                    <!-- <option value="360x640" selected>360x640</option>
+                    <option value="540x960">540x960</option> -->
                     <!-- <option value="720x1280">720x1280</option> -->
                     <option value="customizeResolution">自定义</option>
                 </select>
@@ -90,6 +109,10 @@
     const $loginClass = $('#loginClass'); // 加入课堂按钮
     const $logoutClass = $('#logoutClass'); // 退出课堂按钮
     const renderSelector = '.lga-container'; // 媒体在此容器播放
+
+    const $address = $('#address');// 地理位置
+    const $operator = $('#operator');// 运营商
+    const $streamType = $('#streamType');// 流类型
 
     const $audioInput = $('#audioInput'); // 音频设备
     const $videoInput = $('#videoInput'); // 视频设备

@@ -11,9 +11,9 @@
             <p>当前浏览器不支持webrtc！！！</p>
         </dd>
         <dd id="check_capture">
-            <h2>获取设备</h2>
-            <p>当前浏览器支持获取设备！！！</p>
-            <p>当前浏览器不支持获取设备！！！</p>
+            <h2>自定义流</h2>
+            <p>当前浏览器支持不通过摄像头或者屏幕捕捉采集到的其他流, 比如video标签播放的mp4等！！！</p>
+            <p>当前浏览器不支持不通过摄像头或者屏幕捕捉采集到的其他流, 比如video标签播放的mp4等！！！</p>
         </dd>
         <dd id="check_H264State">
             <h2>H264编码</h2>
@@ -109,6 +109,7 @@
                     hasPublish? resolve(true): resolve(false);
                     lingoAce.zg.stopPublishingStream(streamId);
                     lingoAce.zg.destroyStream(stream);
+                    lingoAce.logoutClass();
                 }).catch(e=> resolve(false));
             });
         });

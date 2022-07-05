@@ -4,7 +4,7 @@
  *                                        *
  *----------------------------------------*/
 class LgaMedia extends HTMLElement {
-    // optins: {streamID, userName, userID, srcObject: Stream, muted}
+    // optins: {streamID, userName, userID, srcObject: Stream, muted, address, operator}
     constructor(options) {
         super();
         this.initParas(options);
@@ -24,14 +24,17 @@ class LgaMedia extends HTMLElement {
         this.className = 'lga-media';
         this.id = `stream_${this.streamID}`;
         this.innerHTML = `
-            <video class="lga-media-video" autoplay playsinline controls ${this.muted? 'muted': ''}></video>
+            <video class="lga-media-video" autoplay loop playsinline controls ${this.muted? 'muted': ''}></video>
             <div class="lga-media-info">${this.userName}</div>
             <div class="lga-media-quality"></div>
         `;
         this.video = this.querySelector('.lga-media-video');
         this.quality = this.querySelector('.lga-media-quality');
+        console.log('srcObject', this.srcObject);
         if(this.srcObject) {
             this.video.srcObject = this.srcObject;
+        }else {
+            this.video.src = '/custom.mp4';
         }
     }
 
@@ -45,7 +48,13 @@ class LgaMedia extends HTMLElement {
                 <p><strong>视频帧率(fps):</strong>${quality.videoFPS}</p>
                 <p><strong>视频码率(kbps):</strong>${quality.videoBitrate}</p>
                 <p><strong>视频丢包率(%):</strong>${quality.videoPacketsLostRate}</p>
+                <p><strong>地理位置:</strong>${this.address}</p>
+                <p><strong>运营商:</strong>${this.operator}</p>
         `;
+    }
+
+    getVideo() {
+        return this.video;
     }
 }
 

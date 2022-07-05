@@ -19,6 +19,11 @@ const lingoAce = (function() {
     let videoInput = 'default';
     let audioInput = 'default';
 
+    // 流附加地理位置、运营商
+    let address = ''; // 地理位置
+    let operator = ''; // 运营商
+    let streamType = ''; // camera、custom.标识推音视频流、者第三方推流(mp4)
+
     // 设置日志级别
     const config = {
         logLevel: 'report',
@@ -38,7 +43,14 @@ const lingoAce = (function() {
                 if (!(Array.isArray(target) && key === 'length')) {
                     console.log(target, key, value, receiver);
                     //新增流，更新dom
-                    document.querySelector(renderSelector).appendChild(value);
+                    const container = document.querySelector(renderSelector);
+                    const firstChild = container.firstChild;
+                    console.error(value.id, localStreamID);
+                    if(value.id == `stream_${localStreamID}` && firstChild) { // 推流放在第一位
+                        container.insertBefore(value, firstChild);
+                    }else {
+                        container.appendChild(value);
+                    }
                 }
                 return Reflect.set(target, key, value, receiver);
             },
@@ -56,32 +68,59 @@ const lingoAce = (function() {
             console.warn('[roomStateUpdate]', roomID, state, errorCode, extendedData);
             if(!errorCode) {
                 if (state == 'CONNECTED') {
-                    if(localStreamID) { // 网络波动，重新连接不要再创建流
-                        return; 
-                    } 
-                    const constraints = {
-                        camera: {
-                            audio: true, 
-                            video: true,
-                            videoQuality: 4,
-                            audioBitrate,
-                            width: frameWidth,
-                            height: frameHeight,
-                            bitrate: frameBitrate,
-                            frameRate: frameFPS,
-                            videoInput,
-                            audioInput,
-                            videoOptimizationMode: 'motion' //motion、detail； motion：流畅优先，在大多数情况下，SDK 不会降低帧率，但是可能会降低发送分辨率
-                        }
+                    if(localStreamID) { return }// 网络波动，重新连接不要再创建流
+                    // 创建音视频流
+                    // let srcObject = '';
+                    if(streamType == 'camera') {
+                        localStream = null;
+                        localStream = await zg.createStream({
+                            camera: {
+                                audio: true, 
+                                video: true,
+                                videoQuality: 4,
+                                audioBitrate,
+                                width: frameWidth,
+                                height: frameHeight,
+                                bitrate: frameBitrate,
+                                frameRate: frameFPS,
+                                videoInput,
+                                audioInput,
+                                videoOptimizationMode: 'motion' //motion、detail； motion：流畅优先，在大多数情况下，SDK 不会降低帧率，但是可能会降低发送分辨率
+                            }
+                        });// 本地流，保存到外层，方便退出等操作时销毁
                     }
-                    console.warn('[roomStateUpdate]', constraints);
-                    localStream = await zg.createStream(constraints); // 本地流，保存到外层，方便退出等操作时销毁
                     localStreamID = `${new Date().getTime().toString()}`; // 本地流ID，保存到外层，方便退出等操作时销毁
                     const muted = true; // 本地流静音 防回采产生的啸音
-                    const lgaMedia = new LgaMedia({streamID: localStreamID, userName, userID, srcObject: localStream, muted});
+                    const publishOption = {extraInfo: JSON.stringify({address, operator})}; //流附加信息，附加了地理位置和运营商
+                    const lgaMedia = new LgaMedia({
+                        streamID: localStreamID, 
+                        userName, 
+                        userID, 
+                        srcObject: localStream? localStream: '', // 没有流，则播放内置mp4
+                        muted, 
+                        address, 
+                        operator
+                    });
                     mediaModal[`stream_${localStreamID}`] = lgaMedia;
                     
-                    zg.startPublishingStream(localStreamID, localStream);
+                    // 创建第三方流
+                    if(streamType != 'camera') {
+                        const source = lgaMedia.getVideo();
+                        source.onplay = async ()=> {
+                            localStream = await zg.createStream({
+                                custom: {
+                                    source,
+                                    bitrate: frameBitrate,
+                                    audioBitrate,
+                                    videoOptimizationMode: 'motion' //motion、detail； motion：流畅优先，在大多数情况下，SDK 不会降低帧率，但是可能会降低发送分辨率      
+                                }
+                            }); 
+                            zg.startPublishingStream(localStreamID, localStream, publishOption);
+                        }
+                    }else {
+                        zg.startPublishingStream(localStreamID, localStream, publishOption);
+                    }
+                    
                 } //state == 'CONNECTING' 、'DISCONNECTED'
             }else {
                 //各种异常处理
@@ -98,7 +137,8 @@ const lingoAce = (function() {
                     const streamID = item.streamID;
                     const remoteStream = await zg.startPlayingStream(streamID);
                     const {userName, userID } = item.user;
-                    const lgaMedia = new LgaMedia({streamID, userName, userID, srcObject: remoteStream});
+                    const {address, operator} = item.extraInfo? JSON.parse(item.extraInfo): {};
+                    const lgaMedia = new LgaMedia({streamID, userName, userID, srcObject: remoteStream, address, operator});
                     mediaModal[`stream_${streamID}`] = lgaMedia;
                 });
             } else if (updateType == 'DELETE') {
@@ -174,6 +214,9 @@ const lingoAce = (function() {
         frameWidth = +options.frameWidth;
         videoInput = options.videoInput;
         audioInput = options.audioInput;
+        address = options.address;
+        operator = options.operator;
+        streamType = options.streamType;
     }
 
     // 登录房间 获取token再登录房间
@@ -196,6 +239,7 @@ const lingoAce = (function() {
             zg.stopPublishingStream(localStreamID);
             zg.destroyStream(localStream);
             localStreamID = '';
+            localStream = null;
         }
         zg.logoutRoom(roomID);
         mediaModal = proxyModal();
