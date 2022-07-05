@@ -7,28 +7,27 @@
     <script src="./js/ZegoExpressWebRTC-2.16.1.js"></script>
   </head>
   <body>
-    <button onclick="addVideo()">addVideo</button>
+    <button onclick="addaudio()">addaudio</button>
     <div id="externerCon"></div>
 
     <script>
     const externerCon = document.querySelector("#externerCon")
-    document.addEventListener("WeixinJSBridgeReady", addVideo)
-
+    document.addEventListener("WeixinJSBridgeReady", addaudio)
     // ios 微信内置浏览器自动播放，可在WeixinJSBridgeReady事件1000毫秒内创建播放器资源池，拉流时分配播放器，替换流媒体资源即可
     // 注意，这个时间内创建的播放器可以复用，替换源即可
     // 为什么是1000毫秒内才生效？受浏览器安全策略影响，需要手动交互才能播放，1000毫秒判定为交互范围。
-    function addVideo() {
+    function addaudio() {
         setTimeout(() => {
             externerCon.innerHTML = `
-            <video id="externerVideo" crossorigin="anonymous" playsinline="" autoplay controls="" muted loop=""></video>
-            <video id="externerVideo1" crossorigin="anonymous" playsinline="" autoplay controls="" muted loop=""></video>
-            <video id="externerVideo2" crossorigin="anonymous" playsinline="" autoplay controls="" muted loop=""></video>
+            <audio id="externeraudio" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></audio>
+            <audio id="externeraudio1" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></audio>
+            <audio id="externeraudio2" crossorigin="anonymous" playsinline="" autoplay controls="" loop=""></audio>
             `;
         }, 0) // 1000毫秒内创建才能生效。
 
         setTimeout(() => {
-            externerVideo = document.querySelector("#externerVideo")
-            externerVideo.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
+            externeraudio = document.querySelector("#externeraudio")
+            externeraudio.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
         }, 3000)// 模拟任意时间，从播放器资源池拿到播放器播放
     }
 
@@ -53,24 +52,23 @@
         console.warn('[roomStreamUpdate]', roomID, updateType, streamList, extendedData);
         const streamID = streamList[0].streamID;
         if (updateType == 'ADD') {
-            document.querySelectorAll('video').forEach(video=> {
-                (function(video) {
-                    video.muted = true;
-                })(video)
-            });
+            // document.querySelectorAll('audio').forEach(audio=> {
+            //     audio.muted = true;
+            // });
             const remoteStream = await zg.startPlayingStream(streamID);
-            const remoteVideo1 = document.getElementById('externerVideo1');
-            const remoteVideo2 = document.getElementById('externerVideo2');
-            if(!remoteVideo1 || !remoteVideo2) {
+            const remoteaudio1 = document.getElementById('externeraudio1');
+            const remoteaudio2 = document.getElementById('externeraudio2');
+            if(!remoteaudio1 || !remoteaudio2) {
                 throw Error('播放器池未初始化...');
             }
-            remoteVideo1.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
-            remoteVideo2.srcObject = remoteStream;
-            document.querySelectorAll('video').forEach(video=> {
-                (function(video) {
-                    video.muted = false;
-                })(video)
-            });
+            remoteaudio1.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
+            remoteaudio2.srcObject = remoteStream;
+            // document.querySelectorAll('audio').forEach(audio=> {
+            //     audio.play();
+            // });
+            // document.querySelectorAll('audio').forEach(audio=> {
+            //     audio.muted = false;
+            // });
         } else if (updateType == 'DELETE') {
             zg.stopPlayingStream(streamID)
         }
