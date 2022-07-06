@@ -4,7 +4,7 @@
  *                                        *
  *----------------------------------------*/
 class LgaMedia extends HTMLElement {
-    // optins: {streamID, userName, userID, srcObject: Stream, muted, address, operator}
+    // optins: {streamID, userName, userID, srcObject: Stream, muted, address, operator, src}
     constructor(options) {
         super();
         this.initParas(options);
@@ -24,7 +24,7 @@ class LgaMedia extends HTMLElement {
         this.className = 'lga-media';
         this.id = `stream_${this.streamID}`;
         this.innerHTML = `
-            <video class="lga-media-video" autoplay loop playsinline controls ${this.muted? 'muted style="transform:scale(-1,1);"': ''}></video>
+            <video class="lga-media-video" crossorigin="anonymous" autoplay loop playsinline controls ${this.muted? 'muted': ''}></video>
             <div class="lga-media-info">${this.userName}</div>
             <div class="lga-media-quality"></div>
         `;
@@ -34,7 +34,8 @@ class LgaMedia extends HTMLElement {
         if(this.srcObject) {
             this.video.srcObject = this.srcObject;
         }else {
-            this.video.src = '/custom.mp4';
+            // this.video.src = '/custom.mp4';
+            this.video.src = this.streamType;
         }
     }
 

@@ -45,7 +45,6 @@ const lingoAce = (function() {
                     //新增流，更新dom
                     const container = document.querySelector(renderSelector);
                     const firstChild = container.firstChild;
-                    console.error(value.id, localStreamID);
                     if(value.id == `stream_${localStreamID}` && firstChild) { // 推流放在第一位
                         container.insertBefore(value, firstChild);
                     }else {
@@ -99,7 +98,8 @@ const lingoAce = (function() {
                         srcObject: localStream? localStream: '', // 没有流，则播放内置mp4
                         muted, 
                         address, 
-                        operator
+                        operator,
+                        streamType
                     });
                     mediaModal[`stream_${localStreamID}`] = lgaMedia;
                     
