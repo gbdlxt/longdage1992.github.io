@@ -128,6 +128,7 @@ const lingoAce = (function() {
         });
     }
     
+    let firstFPSFlag = false;
     // 监听流变化事件
     function bindRoomStreamUpdate() {
         zg.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
@@ -135,7 +136,22 @@ const lingoAce = (function() {
             if (updateType == 'ADD') {
                 streamList.forEach(async item=> {
                     const streamID = item.streamID;
+                    // NOTE 计算首帧时间
+                    let firstFPSDate = 0;
+                    if(!firstFPSFlag) {
+                        firstFPSDate = new Date().getTime();
+                    }
                     const remoteStream = await zg.startPlayingStream(streamID);
+                    // NOTE 计算首帧时间
+                    if(!firstFPSFlag) {
+                        let duration = new Date().getTime() - firstFPSDate;
+                        firstFPSFlag = true;
+                        statistics.post({
+                            "event": "FIRST_FPS_ELAPSED",
+                            "localTs": new Date().getTime(),
+                            "duration": duration,
+                        });
+                    }
                     const {userName, userID } = item.user;
                     const {address, operator} = item.extraInfo? JSON.parse(item.extraInfo): {};
                     const lgaMedia = new LgaMedia({streamID, userName, userID, srcObject: remoteStream, address, operator});
@@ -156,8 +172,23 @@ const lingoAce = (function() {
             console.warn('publishQualityUpdate', streamID, stats);
             const quality = getQualityData(stats, '推流质量');
             mediaModal[`stream_${streamID}`].setQuality(quality);
+            // NOTE 推流质量上报
+            let duration = document.querySelector('video').duration;
+            statistics.post({
+                "event": "QOE",
+                "localTs": new Date().getTime(),
+                "res": `${quality.frameWidth}x${quality.frameHeight}`,
+                "vfps": quality.videoFPS,
+                "vra": quality.videoBitrate,
+                "totalVideoDuration": duration == Infinity? 0: duration,
+                "videoCatonRate": 0,
+                "totalAudioDuration": duration == Infinity? 0: duration,
+                "audioCatonRate": 0,
+                "rtt": quality.currentRoundTripTime,
+                "pktLostRate": quality.videoPacketsLostRate,
+                // "dktLostRate": 0,
+            });
         });
-        
     }
     
     // 监听拉流质量事件
@@ -166,6 +197,20 @@ const lingoAce = (function() {
             console.warn('playQualityUpdate', streamID, stats);
             const quality = getQualityData(stats, '拉流质量');
             mediaModal[`stream_${streamID}`].setQuality(quality);
+            statistics.post({
+                "event": "QOE",
+                "localTs": new Date().getTime(),
+                "res": `${quality.frameWidth}x${quality.frameHeight}`,
+                "vfps": quality.videoFPS,
+                "vra": quality.videoBitrate,
+                "totalVideoDuration": 0,
+                "videoCatonRate": 0,
+                "totalAudioDuration": 0,
+                "audioCatonRate": 0,
+                "rtt": quality.currentRoundTripTime,
+                // "pktLostRate": 0,
+                "dktLostRate": quality.videoPacketsLostRate,
+            });
         });
     }
 
@@ -225,9 +270,25 @@ const lingoAce = (function() {
             fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
             .then(rsp=> rsp.text())
             .then(token=> {
+                // NOTE 开始进入房间上报日志
+                statistics.post({
+                    "event": "JOIN",
+                    "localTs": new Date().getTime()
+                });
                 zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true }).then(rsp=> {
+                    // NOTE 进入房间成功上报日志
+                    statistics.post({
+                        "event": "JOIN_OK",
+                        "localTs": new Date().getTime()
+                    });
                     resolve(rsp);
-                }).catch(e=> resolve(false));
+                }).catch(e=> {
+                    statistics.post({
+                        "event": "JOIN_FAIL",
+                        "localTs": new Date().getTime()
+                    });
+                    resolve(false);
+                });
             });
         });
     };

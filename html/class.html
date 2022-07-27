@@ -167,6 +167,10 @@
             return;
         }
         const options = Object.assign({renderSelector}, formData);
+        statistics.initStatistics(Object.assign({}, options, {
+            audioInputName: $audioInput.find(':selected').text(),
+            videoInputName: $videoInput.find(':selected').text()
+        })); // 初始化接口参数
         lingoAce.initClass(options); // 初始化roomid、userid等
         lingoAce.loginClass(); // 创建房间
     });

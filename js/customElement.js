@@ -38,7 +38,7 @@ class LgaMedia extends HTMLElement {
             this.video.src = this.streamType;
         }
     }
-
+    
     // 质量数据插入流渲染节点的<div class="lga-media-quality"></div>里
     setQuality(quality) {
         console.log(quality);
