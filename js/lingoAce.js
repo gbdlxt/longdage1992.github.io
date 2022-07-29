@@ -173,20 +173,20 @@ const lingoAce = (function() {
             const quality = getQualityData(stats, '推流质量');
             mediaModal[`stream_${streamID}`].setQuality(quality);
             // NOTE 推流质量上报
-            let duration = document.querySelector('video').duration;
             statistics.post({
                 "event": "QOE",
                 "localTs": new Date().getTime(),
                 "res": `${quality.frameWidth}x${quality.frameHeight}`,
                 "vfps": quality.videoFPS,
                 "vra": quality.videoBitrate,
-                "totalVideoDuration": duration == Infinity? 0: duration,
+                "totalVideoDuration": mediaModal[`stream_${streamID}`].getVideo().currentTime,
                 "videoCatonRate": 0,
-                "totalAudioDuration": duration == Infinity? 0: duration,
+                "totalAudioDuration": mediaModal[`stream_${streamID}`].getVideo().currentTime,
                 "audioCatonRate": 0,
                 "rtt": quality.currentRoundTripTime,
                 "pktLostRate": quality.videoPacketsLostRate,
                 // "dktLostRate": 0,
+                "duration": 0
             });
         });
     }
@@ -203,13 +203,14 @@ const lingoAce = (function() {
                 "res": `${quality.frameWidth}x${quality.frameHeight}`,
                 "vfps": quality.videoFPS,
                 "vra": quality.videoBitrate,
-                "totalVideoDuration": 0,
+                "totalVideoDuration": mediaModal[`stream_${streamID}`].getVideo().currentTime,
                 "videoCatonRate": 0,
-                "totalAudioDuration": 0,
+                "totalAudioDuration": mediaModal[`stream_${streamID}`].getVideo().currentTime,
                 "audioCatonRate": 0,
                 "rtt": quality.currentRoundTripTime,
                 // "pktLostRate": 0,
                 "dktLostRate": quality.videoPacketsLostRate,
+                "duration": 0
             });
         });
     }
@@ -271,21 +272,26 @@ const lingoAce = (function() {
             .then(rsp=> rsp.text())
             .then(token=> {
                 // NOTE 开始进入房间上报日志
+                let beginLoginTime = new Date().getTime();
                 statistics.post({
                     "event": "JOIN",
-                    "localTs": new Date().getTime()
+                    "localTs": beginLoginTime
                 });
                 zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true }).then(rsp=> {
                     // NOTE 进入房间成功上报日志
+                    let successTime = new Date().getTime(); 
                     statistics.post({
                         "event": "JOIN_OK",
-                        "localTs": new Date().getTime()
+                        "localTs": successTime,
+                        "duration": successTime - beginLoginTime
                     });
                     resolve(rsp);
                 }).catch(e=> {
+                    let failTime = new Date().getTime(); 
                     statistics.post({
                         "event": "JOIN_FAIL",
-                        "localTs": new Date().getTime()
+                        "localTs": failTime,
+                        "duration": failTime - beginLoginTime
                     });
                     resolve(false);
                 });
