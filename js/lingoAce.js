@@ -210,7 +210,11 @@ const lingoAce = (function() {
                 "rtt": quality.currentRoundTripTime,
                 // "pktLostRate": 0,
                 "dktLostRate": quality.videoPacketsLostRate,
-                "duration": 0
+                "duration": 0,
+                "audioCatonDuration": quality.audioCumulativeBreakTime,
+                "audioCatonRate":quality.audioCumulativeBreakRate,
+                "totalVideoCatonDuration": quality.videoCumulativeBreakTime,
+                "videoCatonRate": quality.videoCumulativeBreakRate
             });
         });
     }
@@ -228,6 +232,10 @@ const lingoAce = (function() {
             videoPacketsLostRate: Math.round(+stats.video.videoPacketsLostRate * 100) / 100, // 视频丢包率
             frameHeight: stats.video.frameHeight,
             frameWidth: stats.video.frameWidth,
+            videoCumulativeBreakTime: stats.video.videoCumulativeBreakTime,
+            videoCumulativeBreakRate: stats.video.videoCumulativeBreakRate,
+            audioCumulativeBreakTime: stats.audio.audioCumulativeBreakTime,
+            audioCumulativeBreakRate: stats.audio.audioCumulativeBreakRate,
         };
     }
     
