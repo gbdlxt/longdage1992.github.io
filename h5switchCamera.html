@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Zego Express Video Call</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="./js/ZegoExpressWebRTC-2.19.0.js"></script>
+    </head>
+    <body>
+        <h1>Zego RTC Video Call</h1>
+        <div class="video-wrapper">
+            <button onclick="switchCamera()">切换摄像头</button>
+            <video id="local-video" autoplay muted playsinline controls></video>
+        </div>
+    </body>
+    <script>
+        //初始化信息
+        let appID = 1739272706;
+        let server = 'wss://webliveroom-test.zego.im/ws';
+
+        let userID = 'Kline'; // userID 用户自己设置，必须保证全局唯一
+        let userName = "克莱恩";// userName 用户自己设置，没有唯一性要求
+        let roomID = "room01"; // roomID 用户自己设置，必须保证全局唯一
+
+        let localStream = null;
+        let isFrontendCamera = true; // 是前置摄像头？ true,是。
+        let streamConfig = {
+            videoQuality: 2,
+            video: true,
+            audio: true,
+        };
+        // 初始化实例
+        const zg = new ZegoExpressEngine(appID, server);
+        zg.on('roomStateUpdate', async (roomID, state, errorCode, extendedData) => {
+            if (state == 'CONNECTED') {
+                localStream = await zg.createStream({
+                    camera: {
+                        facingMode: 'user', //摄像头朝向，“user” 表示前置摄像头，“environment” 表示后置摄像头
+                        ...streamConfig
+                    }
+                });
+                const localVideo = document.getElementById('local-video');
+                localVideo.srcObject = localStream;
+                zg.startPublishingStream('h5switchCamera', localStream);
+            }
+        });
+
+        // 加入房间
+        fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
+            .then(rsp=> rsp.text())
+            .then(token=> {
+                zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true })
+            });
+        
+        async function switchCamera() {
+            // 停视轨
+            localStream.getVideoTracks()[0].stop();
+            let stream;
+            if(isFrontendCamera) {// 切换到后置摄像头
+                stream = await zg.createStream({
+                    camera: {
+                        facingMode: 'environment', //摄像头朝向，“user” 表示前置摄像头，“environment” 表示后置摄像头
+                        ...streamConfig
+                    }
+                });
+            } else {// 切换前置摄像头
+                stream = await zg.createStream({
+                    camera: {
+                        facingMode: 'user', //摄像头朝向，“user” 表示前置摄像头，“environment” 表示后置摄像头
+                        ...streamConfig
+                    }
+                });
+            }
+            let videoTrack = stream.getVideoTracks()[0];
+            let {errorCode, extendedData} = await zg.replaceTrack(localStream, videoTrack); // errorCode == 0 成功
+            console.warn('switchCamera', {errorCode, extendedData});
+            isFrontendCamera = !isFrontendCamera;
+        }
+    </script>
+</html>
