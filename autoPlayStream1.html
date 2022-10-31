@@ -59,14 +59,19 @@
         if (updateType == 'ADD') {
             const remoteStream = await zg.startPlayingStream(streamID);
             // const remoteaudio1 = audioPool.shift();
-            const remoteaudio2 = audioPool.shift();
-            if(!remoteaudio1 || !remoteaudio2) {
-                throw Error('播放器池未初始化...');
-            }
+            // const remoteaudio2 = audioPool.shift();
+            // if(!remoteaudio1 || !remoteaudio2) {
+            //     throw Error('播放器池未初始化...');
+            // }
             // remoteaudio1.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
             // remoteaudio2.srcObject = remoteStream;
             // externerCon.appendChild(remoteaudio1);
-            externerCon.appendChild(remoteaudio2);
+            const remoteaudio = audioPool.shift();
+            if(!remoteaudio) {
+                throw Error('播放器资源不足...');
+            }
+            remoteaudio.srcObject = remoteStream;
+            externerCon.appendChild(remoteaudio);
         } else if (updateType == 'DELETE') {
             zg.stopPlayingStream(streamID);
             let audio = externerCon.querySelector('audio');
