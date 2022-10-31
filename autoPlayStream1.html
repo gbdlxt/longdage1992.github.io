@@ -12,15 +12,16 @@
     <div id="externerCon"></div>
 
     <script>
-    const externerCon = document.querySelector("#externerCon")
+    const externerCon = document.querySelector("#externerCon");
     document.addEventListener("WeixinJSBridgeReady", addaudio)
     // ios 微信内置浏览器自动播放，可在WeixinJSBridgeReady事件1000毫秒内创建播放器资源池，拉流时分配播放器，替换流媒体资源即可
     // 注意，这个时间内创建的播放器可以复用，替换源即可
     // 为什么是1000毫秒内才生效？受浏览器安全策略影响，需要手动交互才能播放，1000毫秒判定为交互范围。
     const audioPool = [];
+    const MAX_POOL = 1;
     function addaudio() {
         setTimeout(() => {
-            for(let i = 0; i < 3; i++) {
+            for(let i = 0; i < MAX_POOL; i++) {
                 (function(i) {
                     let audio = document.createElement('audio');
                     audio.id = `externeraudio${i}`;
@@ -30,22 +31,15 @@
                     audio.setAttribute('controls', '');
                     audio.setAttribute('loop', '');
                     audioPool.push(audio);
-                    // externerCon.appendChild(audio);
                 })(i);
             }
         }, 0); // 1000毫秒内创建才能生效。
-
-        setTimeout(() => {
-            let audio = audioPool.shift();
-            audio.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
-            externerCon.appendChild(audio);
-        }, 3000)// 模拟任意时间，从播放器资源池拿到播放器播放
     }
 
     let appID = 1739272706;
     let server = 'wss://webliveroom-test.zego.im/ws';
     let userID = 'alagoon'; // userID 用户自己设置，必须保证全局唯一
-    let userName = "阿拉贡";// userName 用户自己设置，没有唯一性要求
+    let userName = "阿拉贡"; // userName 用户自己设置，没有唯一性要求
     let roomID = '55677';
     // 初始化实例
     const zg = new ZegoExpressEngine(appID, server);
@@ -64,17 +58,21 @@
         const streamID = streamList[0].streamID;
         if (updateType == 'ADD') {
             const remoteStream = await zg.startPlayingStream(streamID);
-            const remoteaudio1 = audioPool.shift();
+            // const remoteaudio1 = audioPool.shift();
             const remoteaudio2 = audioPool.shift();
             if(!remoteaudio1 || !remoteaudio2) {
                 throw Error('播放器池未初始化...');
             }
-            remoteaudio1.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
-            remoteaudio2.srcObject = remoteStream;
-            externerCon.appendChild(remoteaudio1);
+            // remoteaudio1.src="https://zego-public.oss-cn-shanghai.aliyuncs.com/sdk-doc/assets/big_buck_bunny.mp4";
+            // remoteaudio2.srcObject = remoteStream;
+            // externerCon.appendChild(remoteaudio1);
             externerCon.appendChild(remoteaudio2);
         } else if (updateType == 'DELETE') {
             zg.stopPlayingStream(streamID);
+            let audio = externerCon.querySelector('audio');
+            audio.srcObject = null;
+            audio.remove();
+            audioPool.push(audio);
         }
     });
 
