@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Zego RTC Speaker Check</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="./js/ZegoExpressWebRTC-2.19.0.js"></script>
+        <style>
+            body { margin: auto; width: 50%; }
+            ul>li { padding: 6px 24px; display: inline-block; font-weight: 600; }
+            ul>li:first-child { color: #0f0}
+        </style>
+    </head>
+    <body>
+        <ul>
+            <li>扬声器</li>
+            <li>麦克风</li>
+            <li>摄像头</li>
+        </ul>
+        <div>
+            <button onclick="paly()">播放/暂停音乐</button>
+            <audio loop src="./custom.mp4"></audio>
+            <p>正在播放音乐，你能听到声音吗？</p>
+            <label role="speakerSound">扬声器：<input id="speakerSound" name="speakerSound" type="range" min="0" max="100"></label>
+            <br>
+            <label role="sound">音量：<input id="sound" name="sound" value="100" type="range" min="0" max="100"></label>
+            <span id="soundValue">100</span>%
+            <br>
+            <label role="device">使用设备：</label>
+            <br>
+            <select id="speakerDevices"></select>
+        </div>
+    </body>
+    <script>
+        //初始化信息
+        let appID = 1739272706;
+        let server = 'wss://webliveroom-test.zego.im/ws';
+
+        let userID = 'alagong'; // userID 用户自己设置，必须保证全局唯一
+        let userName = "阿拉贡";// userName 用户自己设置，没有唯一性要求
+        let roomID = "zegortcspeakercheck"; // roomID 用户自己设置，必须保证全局唯一
+
+        let localStream = null;
+        
+        // 初始化实例
+        const zg = new ZegoExpressEngine(appID, server);
+        zg.setDebugVerbose(false); // 禁调试弹窗
+        renderSpeaker();
+        // 枚举，生成设备列表
+        function renderSpeaker() {
+            zg.getSpeakers().then(rsp=> {
+                console.error('[speakers]', rsp);
+                let options = [];
+                rsp.forEach(i=> {
+                    options.push(`<option value="${i.deviceID}">${i.deviceName}</option>`);
+                })
+                document.querySelector('#speakerDevices').innerHTML = options.join(' ');
+            });
+        }
+        
+        // 加入房间
+        fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
+            .then(rsp=> rsp.text())
+            .then(token=> {
+                zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true })
+                    .then(rsp=> console.log('[loginRoom]', rsp)).catch(err=> console.error('[yyyy]', err))
+            });
+        
+        // 切换扬声器
+        document.querySelector('#speakerDevices').onchange = function() {
+            console.error('[onchange]', this.value)
+            let audio = document.querySelector('audio');
+            zg.useAudioOutputDevice(audio, this.value);
+        }
+
+        async function paly() {
+            let audio = document.querySelector('audio');
+            if(audio.paused) {
+                audio.play();
+            }else {
+                audio.pause();
+                context.close();
+            }
+        } 
+        // let analyser;
+        document.querySelector('audio').addEventListener('play', async e=> {
+            console.error('play')
+            onSpeakerVolumeChange()
+        })
+        var context = null;
+        async function onSpeakerVolumeChange() {
+            try {
+                // 处理audio的音频数据
+                let audio = document.querySelector('audio');
+                context = new AudioContext();
+                let speakerMediaStream = await audio.captureStream();
+                // let source = context.createMediaElementSource(audio);
+                let source = context.createMediaStreamSource(speakerMediaStream)
+                let processor = context.createScriptProcessor(4096, 1, 1); //创建一个音频分析对象，采样的缓冲区大小为8192，输入和输出都是单声道
+                source.connect(processor); //将该分析对象与麦克风音频进行连接
+                processor.connect(context.destination);
+                processor.onaudioprocess = (e) => {
+                    //开始处理音频
+                    var buffer = e.inputBuffer.getChannelData(0); //获得缓冲区的输入音频，转换为包含了PCM通道数据的32位浮点数组
+                    //创建变量并迭代来获取最大的音量值
+                    var maxVal = 0;
+                    // Todo: 这一块比较耗性能
+                    for (var i = 0; i < buffer.length; i++) {
+                        if (maxVal < buffer[i]) {
+                            maxVal = buffer[i];
+                        }
+                    }
+                    //显示音量值
+                    let speakerRealVolume = parseInt((Math.round(maxVal * 100)).toString());
+                    document.querySelector('#speakerSound').value = speakerRealVolume;
+                    console.error('[speakerRealVolume]', speakerRealVolume, maxVal);
+                };
+                context.resume();
+                
+            } catch (e) {
+                console.error('Your browser does not support AudioContext');
+            }
+        }
+    </script>
+</html>
