@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Zego Express Video Call</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <!-- <script src="./dist/ZegoExpressWebRTC.js"></script> -->
+        <script src="./dist_js/ZegoExpressWebRTC-2.17.0.js"></script>
+        <link rel="stylesheet" href="./css/styles.css">
+    </head>
+    <body>
+        <h1>Zego RTC Video Call</h1>
+        <div class="video-wrapper">
+            <br>
+            <button onclick="logoutRoom()">退出房间</button>
+            <br>
+            <button onclick="mutePublish()">关闭推流摄像头</button>
+            <br>
+            <button onclick="login()">登录</button>
+            <br>
+            <hr>
+            <h4>Local video</h4>
+            <h4>Remote video</h4>
+            <video id="local-video" autoplay muted playsinline controls></video>
+            <video id="remote-video" autoplay muted playsinline controls></video>
+        </div>
+    </body>
+    <script>
+        //初始化信息
+        let appID = 1739272706;
+        let server = 'wss://webliveroom-test.zego.im/ws';
+
+        let userID = 'alagong'; // userID 用户自己设置，必须保证全局唯一
+        let userName = "阿拉贡";// userName 用户自己设置，没有唯一性要求
+        let roomID = "room02"; // roomID 用户自己设置，必须保证全局唯一
+
+        let localStream = null;
+        let accessToken = '';
+        
+        // 初始化实例
+        const zg = new ZegoExpressEngine(appID, server);
+        zg.setDebugVerbose(false);
+
+        zg.on('roomStateUpdate', async (roomID, state, errorCode, extendedData) => {
+            console.error('[roomStateUpdate]', roomID, state, errorCode, extendedData);
+            if(!errorCode) {
+                if (state == 'CONNECTED') {
+                    localStream = await zg.createStream({camera: {video: true, audio: true, videoQuility:2}});
+                    const localVideo = document.getElementById('local-video');
+                    let streamID = new Date().getTime().toString();
+                    localVideo.srcObject = localStream;
+                    zg.startPublishingStream(streamID, localStream)
+                    
+                }else if (state == 'DISCONNECTED') {
+
+                }else { //state == 'CONNECTING'
+
+                }
+            }else {
+                //各种异常处理
+            }
+        });
+
+        
+
+        zg.on('roomStreamUpdate', async (roomID, updateType, streamList, extendedData) => {
+            console.warn('[roomStreamUpdate]', roomID, updateType, streamList, extendedData);
+            if (updateType == 'ADD') {
+                const streamID = streamList[0].streamID;
+                zg.stopPlayingStream(streamID)
+                remoteStream = await zg.startPlayingStream(streamID);
+                const remoteVideo = document.getElementById('remote-video');
+                remoteVideo.srcObject = remoteStream;
+            } else if (updateType == 'DELETE') {
+                const streamID = streamList[0].streamID;
+                // zg.stopPlayingStream(streamID)
+            }
+        });
+
+       
+
+
+        // 加入房间
+        fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
+            .then(rsp=> rsp.text())
+            .then(token=> {
+                accessToken = token;
+                // zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true })
+                // .then(rsp=> console.error('[xxx]', rsp)).catch(err=> console.error('[yyyy]', err))
+            });
+
+
+        function login() {
+            zg.loginRoom(roomID, accessToken, { userID, userName }, { userUpdate: true })
+                .then(rsp=> console.error('[xxx]', rsp)).catch(err=> console.error('[yyyy]', err))
+        }
+        
+
+        function logoutRoom() {
+            zg.logoutRoom(roomID);
+        }
+
+        let muteState = true;
+        function mutePublish() {
+            zg.mutePublishStreamVideo(localStream, muteState, false);
+            muteState = !muteState;
+        }
+
+    </script>
+</html>
