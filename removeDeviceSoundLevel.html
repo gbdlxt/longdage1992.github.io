@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Zego Express Video Call</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <!-- <script src="./dist/ZegoExpressWebRTC.js"></script> -->
+        <script src="./js/ZegoExpressWebRTC-2.17.0.js"></script>
+        <link rel="stylesheet" href="./css/styles.css">
+    </head>
+    <body>
+        <h1>Zego RTC Video Call</h1>
+        <button onclick="stopPublish()">停止推流</button>
+        <button onclick="destroyStream()">销毁流</button>
+        <button onclick="startPublish()">开始推流</button>
+        <div class="video-wrapper">
+            <hr>
+            <h4>Local video</h4>
+            <h4>Remote video</h4>
+            <video id="local-video" autoplay muted playsinline controls></video>
+            <!-- <video id="remote-video" autoplay muted playsinline controls></video> -->
+            <div id="rv"></div>
+        </div>
+        <div id="information">
+            <strong></strong>
+        </div>
+    </body>
+    <script>
+        //初始化信息
+        let appID = 1739272706;
+        let server = 'wss://webliveroom-test.zego.im/ws';
+
+        let userID = 'alagong'; // userID 用户自己设置，必须保证全局唯一
+        let userName = "阿拉贡";// userName 用户自己设置，没有唯一性要求
+        let roomID = "room02"; // roomID 用户自己设置，必须保证全局唯一
+
+        let localStream = null;
+        let accessToken = '';
+        let streamID = new Date().getTime().toString();
+        
+        // 初始化实例
+        const zg = new ZegoExpressEngine(appID, server);
+        zg.setDebugVerbose(false);
+
+        zg.on('roomStateUpdate', async (roomID, state, errorCode, extendedData) => {
+            console.error('[roomStateUpdate]', roomID, state, errorCode, extendedData);
+            if (state == 'CONNECTED') {
+                localStream = await zg.createStream({camera: {video: true, audio: true}});
+                const localVideo = document.getElementById('local-video');
+                localVideo.srcObject = localStream;
+                zg.startPublishingStream(streamID, localStream);
+            }
+        });
+        
+        zg.setSoundLevelDelegate(true, 1000);
+        // zg.on("soundLevelUpdate", (soundLevelList)=>{
+        //     console.warn("[soundLevelUpdate]",JSON.stringify(soundLevelList))
+        // });
+
+        zg.on("capturedSoundLevelUpdate", (soundLevel)=>{
+            document.querySelector('strong').innerHTML = soundLevel
+            console.warn("[capturedSoundLevelUpdate]",JSON.stringify(soundLevel))
+        });
+        
+        zg.on("deviceError", async (errorCode, deviceName)=>{
+            // let microPhone = (await zg.getMicrophones()).filter((item)=> item.deviceID == 'default')[0];
+            // console.error("[deviceError]", errorCode, deviceName, microPhone);
+            // let rst = await zg.useAudioDevice(localStream, microPhone.deviceID);
+            // console.error('rst', rst);
+            zg.stopPublishingStream(streamID);
+            zg.destroyStream(localStream);
+            localStream = await zg.createStream({camera: {video: true, audio: true}});
+            const localVideo = document.getElementById('local-video');
+            localVideo.srcObject = localStream;
+            zg.startPublishingStream(streamID, localStream);
+        });
+
+        // 加入房间
+        fetch(`https://wsliveroom-alpha.zego.im:8282/token?app_id=${appID}&id_name=${userID}`)
+            .then(rsp=> rsp.text())
+            .then(token=> {
+                accessToken = token
+                zg.loginRoom(roomID, token, { userID, userName }, { userUpdate: true });
+            });
+
+        function stopPublish() {
+            zg.stopPublishingStream(streamID);
+        }
+        async function startPublish() {
+            if(!localStream.active) {
+                localStream = await zg.createStream({camera: {video: true, audio: true}});
+                const localVideo = document.getElementById('local-video');
+                localVideo.srcObject = localStream;
+            }
+            zg.startPublishingStream(streamID, localStream);
+        }
+        function destroyStream() {
+            zg.destroyStream(localStream);
+        }
+    </script>
+</html>
